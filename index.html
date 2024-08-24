@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Response Platform</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+     <link rel="stylesheet" href="style.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        .form-container { margin-top: 20px; }
+        .filters { margin: 10px 0; }
+       /* Tabs Styling */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .tab-button.active {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Community Response Platform</h1>
+    <div class="form-container">
+        <form id="responseForm">
+            <label for="message">Description:</label>
+            <textarea id="message" rows="4" cols="50"></textarea>
+            <br>
+            <label for="type">Type:</label>
+            <select id="type">
+                <option value="volunteer">Volunteer</option>
+                <option value="incident">Incident</option>
+            </select>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+   <div class="tabs">
+        <div class="tab-button active" data-tab="map-view">Map View</div>
+        <div class="tab-button" data-tab="list-view">List View</div>
+    </div>
+    <div class="tab-content active" id="map-view">
+    <div class="filters">
+        <label><input type="checkbox" id="filter-volunteers" checked> Show Volunteers</label>
+        <label><input type="checkbox" id="filter-incidents" checked> Show Incidents</label>
+    </div>
+
+    <div id="map"></div>
+    </div>
+ <div class="tab-content" id="list-view">
+   <div id="incident-list">
+        <h2>Recent Incidents</h2>
+        
+        <div id="incidentItems"></div>
+    </div>
+ </div>
+   
+   
+
+
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <!-- Use type="module" to enable ES6 imports -->
+    <script type="module">
+        // Import the necessary Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, Timestamp} from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXbdFfQME91aZgkbuAal_3BviygzlCfyw",
+            authDomain: "community-response-map-95eac.firebaseapp.com",
+            projectId: "community-response-map-95eac",
+            storageBucket: "community-response-map-95eac.appspot.com",
+            messagingSenderId: "185333265638",
+            appId: "1:185333265638:web:7a14b40bacb9c713d5f727",
+            measurementId: "G-0B6L4VQ0LJ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add a tile layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Icons for volunteers and incidents
+        const volunteerIcon = L.icon({
+            iconUrl: 'volunteer-icon.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -38]
+        });
+
+        const incidentIcon = L.icon({
+            iconUrl: 'incident-icon.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -38]
+        });
+
+        // Store markers
+        let volunteerMarkers = [];
+        let incidentMarkers = [];
+
+        // Function to add a volunteer to the map
+        function addVolunteer(lat, lng, name) {
+            const marker = L.marker([lat, lng], { icon: volunteerIcon }).addTo(map)
+                .bindPopup(`<strong>Volunteer:</strong> ${name}`)
+                .openPopup();
+            volunteerMarkers.push(marker);
+            updateMarkersVisibility();
+        }
+
+        // Function to add an incident to the map
+        function addIncident(id, lat, lng, description) {
+            const marker = L.marker([lat, lng], { icon: incidentIcon }).addTo(map)
+                .bindPopup(`<strong>Incident:</strong> ${description}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
+                .openPopup();
+            incidentMarkers.push({ id, marker });
+            updateMarkersVisibility();
+        }
+
+       // Function to add an incident to the list view
+        function addIncidentToList(description, date) {
+            const incidentList = document.getElementById('incidentItems');
+            const incidentItem = document.createElement('div');
+            incidentItem.className = 'incident-item';
+            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}`;
+            incidentList.prepend(incidentItem); // Add to the top of the list
+        }
+
+      // Function to mark an incident as solved
+async function markAsSolved(id) {
+    try {
+        const incidentRef = doc(db, "incidents", id);
+        await updateDoc(incidentRef, { solved: true });
+
+        // Remove the marker from the map
+        const markerObj = incidentMarkers.find(m => m.id === id);
+        if (markerObj) {
+            map.removeLayer(markerObj.marker);
+            incidentMarkers = incidentMarkers.filter(m => m.id !== id);
+        }
+
+        console.log('Incident marked as solved');
+    } catch (error) {
+        console.error('Error marking incident as solved:', error);
+    }
+}
+
+// Attach markAsSolved to the window object
+window.markAsSolved = markAsSolved;
+
+
+        // Function to handle the geolocation success
+        function onLocationSuccess(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Center the map on the user's location
+            map.setView([lat, lng], 13);
+
+            // Optionally, add a marker at the user's location
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('You are here')
+                .openPopup();
+        }
+
+        // Function to handle the geolocation error
+        function onLocationError(error) {
+            console.error('Error getting location: ', error);
+            alert('Unable to retrieve your location.');
+        }
+
+        // Request the user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+
+        // Form Submission Handling
+        document.getElementById('responseForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting normally
+            const message = document.getElementById('message').value;
+            const type = document.getElementById('type').value;
+
+            // Get the current map center
+            const center = map.getCenter();
+            const lat = center.lat;
+            const lng = center.lng;
+
+            // Save the incident to Firestore
+            saveIncident(lat, lng, message, type);
+
+            // Clear the form
+            document.getElementById('message').value = '';
+        });
+
+        async function saveIncident(lat, lng, message, type) {
+            try {
+                const docRef = await addDoc(collection(db, "incidents"), {
+                    lat: lat,
+                    lng: lng,
+                    description: message,
+                    type: type,
+                    solved: false,
+                    date: new Date()
+                });
+                console.log('Incident saved successfully');
+
+                // Add to the map
+                if (type === 'volunteer') {
+                    addVolunteer(lat, lng, message);
+                } else if (type === 'incident') {
+                    addIncident(docRef.id, lat, lng, message);
+                }
+            } catch (error) {
+                console.error('Error saving incident:', error);
+            }
+        }
+
+        async function loadIncidents() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'incidents'));
+                volunteerMarkers.forEach(marker => map.removeLayer(marker));
+                incidentMarkers.forEach(markerObj => map.removeLayer(markerObj.marker));
+                volunteerMarkers = [];
+                incidentMarkers = [];
+
+                 // Clear existing list items
+                document.getElementById('incidentItems').innerHTML = '';
+
+                querySnapshot.forEach((doc) => {
+                    const incident = doc.data();
+                    const id = doc.id;
+                    if (incident.type === 'volunteer') {
+                        addVolunteer(incident.lat, incident.lng, incident.description);
+                    } else if (incident.type === 'incident' && !incident.solved) {
+                        addIncident(id, incident.lat, incident.lng, incident.description);
+                        addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString());
+                    }
+                });
+            } catch (err) {
+                console.error('Error fetching incidents:', err);
+            }
+        }
+
+        function updateMarkersVisibility() {
+            const showVolunteers = document.getElementById('filter-volunteers').checked;
+            const showIncidents = document.getElementById('filter-incidents').checked;
+
+            volunteerMarkers.forEach(marker => {
+                if (showVolunteers) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+
+            incidentMarkers.forEach(({ marker }) => {
+                if (showIncidents) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+
+        document.getElementById('filter-volunteers').addEventListener('change', updateMarkersVisibility);
+        document.getElementById('filter-incidents').addEventListener('change', updateMarkersVisibility);
+
+        // Load incidents from Firestore when the map is ready
+        loadIncidents();
+
+function switchTab(tab) {
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`.tab-button[data-tab="${tab}"]`).classList.add('active');
+            document.querySelector(`#${tab}`).classList.add('active');
+        }
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                switchTab(button.getAttribute('data-tab'));
+            });
+        });
+
+    </script>
+</body>
+</html>
