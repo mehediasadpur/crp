@@ -165,6 +165,8 @@
         function centerOnIncident(lat, lng) {
             map.setView([lat, lng], 13);
         }
+        // Make the function globally accessible
+window.centerOnIncident = centerOnIncident;
       // Function to mark an incident as solved
 async function markAsSolved(id) {
     try {
