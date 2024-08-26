@@ -305,29 +305,10 @@ window.markAsSolved = markAsSolved;
         document.getElementById('filter-volunteers').addEventListener('change', updateMarkersVisibility);
         document.getElementById('filter-incidents').addEventListener('change', updateMarkersVisibility);
         
-       // Real-time listener for changes to the incidents collection
-function setupRealTimeListener() {
-    const incidentsRef = collection(db, 'incidents');
-    onSnapshot(incidentsRef, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            const incident = change.doc.data();
-            const id = change.doc.id;
-
-            if (change.type === 'removed' || incident.status === 'solved') {
-                // Remove the marker from the map
-                if (incidentMarkers[id]) {
-                    map.removeLayer(incidentMarkers[id]);
-                    delete incidentMarkers[id];
-                }
-            } else if (change.type === 'added') {
-                addIncident(incident.lat, incident.lng, incident.description, incident.date, id);
-            }
-        });
-    });
-}
+       
         // Load incidents from Firestore when the map is ready
         loadIncidents();
-        setupRealTimeListener();
+       
 
 function switchTab(tab) {
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
