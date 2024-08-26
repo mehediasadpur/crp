@@ -246,7 +246,7 @@ window.markAsSolved = markAsSolved;
                 if (type === 'volunteer') {
                     addVolunteer(lat, lng, message);
                 } else if (type === 'incident') {
-                    addIncident(docRef.id, lat, lng, message, date);
+                    addIncident(docRef.id, lat, lng, message, docRef.date);
                 }
             } catch (error) {
                 console.error('Error saving incident:', error);
