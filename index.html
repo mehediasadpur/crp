@@ -161,7 +161,10 @@
             incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}<br><a href="#map" onclick="centerOnIncident(${lat}, ${lng})">View on Map</a>`;
             incidentList.prepend(incidentItem); // Add to the top of the list
         }
-
+// Center map on the incident location
+        function centerOnIncident(lat, lng) {
+            map.setView([lat, lng], 13);
+        }
       // Function to mark an incident as solved
 async function markAsSolved(id) {
     try {
