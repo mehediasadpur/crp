@@ -89,7 +89,7 @@
     <script type="module">
         // Import the necessary Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, Timestamp} from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, Timestamp, onSnapshot, orderBy} from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyCXbdFfQME91aZgkbuAal_3BviygzlCfyw",
@@ -141,10 +141,13 @@
             updateMarkersVisibility();
         }
 
+     
+
         // Function to add an incident to the map
-        function addIncident(id, lat, lng, description) {
+        function addIncident(id, lat, lng, description, date) {
+            
             const marker = L.marker([lat, lng], { icon: incidentIcon }).addTo(map)
-                .bindPopup(`<strong>Incident:</strong> ${description}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
+                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${date}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
                 .openPopup();
             incidentMarkers.push({ id, marker });
             updateMarkersVisibility();
@@ -252,12 +255,13 @@ window.markAsSolved = markAsSolved;
 
         async function loadIncidents() {
             try {
+                const q = query(collection(db, 'incidents'), orderBy('date', 'asc'));
                 const querySnapshot = await getDocs(collection(db, 'incidents'));
                 volunteerMarkers.forEach(marker => map.removeLayer(marker));
                 incidentMarkers.forEach(markerObj => map.removeLayer(markerObj.marker));
                 volunteerMarkers = [];
                 incidentMarkers = [];
-
+                onSnapshot(q, (querySnapshot) => {
                  // Clear existing list items
                 document.getElementById('incidentItems').innerHTML = '';
 
@@ -267,10 +271,11 @@ window.markAsSolved = markAsSolved;
                     if (incident.type === 'volunteer') {
                         addVolunteer(incident.lat, incident.lng, incident.description);
                     } else if (incident.type === 'incident' && !incident.solved) {
-                        addIncident(id, incident.lat, incident.lng, incident.description);
+                        addIncident(id, incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
                         addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString());
                     }
                 });
+               });
             } catch (err) {
                 console.error('Error fetching incidents:', err);
             }
