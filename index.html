@@ -244,7 +244,7 @@ window.markAsSolved = markAsSolved;
 
                 // Add to the map
                 if (type === 'volunteer') {
-                    addVolunteer(lat, lng, name);
+                    addVolunteer(lat, lng, message);
                 } else if (type === 'incident') {
                     addIncident(docRef.id, lat, lng, message, docRef.date);
                 }
