@@ -52,8 +52,8 @@
             <br>
             <label for="type">Type:</label>
             <select id="type">
-                <option value="volunteer">Volunteer</option>
                 <option value="incident">Incident</option>
+                <option value="volunteer">Volunteer</option>              
             </select>
             <br>
             <button type="submit">Submit</button>
@@ -247,6 +247,7 @@ window.markAsSolved = markAsSolved;
                     addVolunteer(lat, lng, message);
                 } else if (type === 'incident') {
                     addIncident(docRef.id, lat, lng, message);
+                    addIncidentToList(docRef.id, lat, lng, message);
                 }
             } catch (error) {
                 console.error('Error saving incident:', error);
