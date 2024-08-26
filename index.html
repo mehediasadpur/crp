@@ -255,8 +255,9 @@ window.markAsSolved = markAsSolved;
 
         async function loadIncidents() {
             try {
-                
-                const querySnapshot = await getDocs(collection(db, 'incidents', orderBy('date', 'asc')));
+                // Create a query against the collection, ordering by the 'date' field in ascending order
+        const q = query(collection(db, 'incidents'), orderBy('date', 'asc'));
+                const querySnapshot = await getDocs(q);
                 volunteerMarkers.forEach(marker => map.removeLayer(marker));
                 incidentMarkers.forEach(markerObj => map.removeLayer(markerObj.marker));
                 volunteerMarkers = [];
