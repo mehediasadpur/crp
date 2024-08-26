@@ -147,7 +147,7 @@
         function addIncident(id, lat, lng, description, date) {
             
             const marker = L.marker([lat, lng], { icon: incidentIcon }).addTo(map)
-                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${date}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
+                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${formatTimestamp(date)}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
                 .openPopup();
             incidentMarkers.push({ id, marker });
             updateMarkersVisibility();
@@ -238,7 +238,7 @@ window.markAsSolved = markAsSolved;
                     description: message,
                     type: type,
                     solved: false,
-                    date: new Date()
+                    date: Timestamp.now() // Use Firestore's Timestamp for the current time
                 });
                 console.log('Incident saved successfully');
 
@@ -246,13 +246,18 @@ window.markAsSolved = markAsSolved;
                 if (type === 'volunteer') {
                     addVolunteer(lat, lng, message);
                 } else if (type === 'incident') {
-                    addIncident(docRef.id, lat, lng, message, docRef.date);
+                    addIncident(docRef.id, lat, lng, message, date);
                 }
             } catch (error) {
                 console.error('Error saving incident:', error);
             }
         }
-
+// Format timestamp for display
+function formatTimestamp(timestamp) {
+    // Format Firestore Timestamp to a human-readable date string
+    const date = timestamp.toDate();
+    return date.toLocaleString(); // or use any custom formatting you prefer
+}
         async function loadIncidents() {
             try {
                 // Create a query against the collection, ordering by the 'date' field in ascending order
