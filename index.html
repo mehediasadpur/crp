@@ -222,15 +222,16 @@ window.markAsSolved = markAsSolved;
             const center = map.getCenter();
             const lat = center.lat;
             const lng = center.lng;
-
+            // Get the current date
+    const now = new Date();
             // Save the incident to Firestore
-            saveIncident(lat, lng, message, type);
+            saveIncident(lat, lng, message, type, now);
 
             // Clear the form
             document.getElementById('message').value = '';
         });
 
-        async function saveIncident(lat, lng, message, type) {
+        async function saveIncident(lat, lng, message, type, date) {
             try {
                 const docRef = await addDoc(collection(db, "incidents"), {
                     lat: lat,
@@ -246,7 +247,7 @@ window.markAsSolved = markAsSolved;
                 if (type === 'volunteer') {
                     addVolunteer(lat, lng, message);
                 } else if (type === 'incident') {
-                    addIncident(docRef.id, lat, lng, message, docRef.date);
+                    addIncident(docRef.id, lat, lng, message, date);
                 }
             } catch (error) {
                 console.error('Error saving incident:', error);
