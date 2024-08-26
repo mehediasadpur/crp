@@ -147,7 +147,7 @@
         function addIncident(id, lat, lng, description, date) {
             
             const marker = L.marker([lat, lng], { icon: incidentIcon }).addTo(map)
-                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${formatTimestamp(date)}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
+                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${date}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
                 .openPopup();
             incidentMarkers.push({ id, marker });
             updateMarkersVisibility();
