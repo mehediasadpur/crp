@@ -279,7 +279,7 @@ function formatTimestamp(timestamp) {
                         addVolunteer(incident.lat, incident.lng, incident.description);
                     } else if (incident.type === 'incident' && !incident.solved) {
                         addIncident(id, incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
-                        addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString());
+                        addIncidentToList(incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
                     }
                 });
                
