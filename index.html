@@ -253,7 +253,12 @@ window.markAsSolved = markAsSolved;
                 console.error('Error saving incident:', error);
             }
         }
-
+// Format timestamp for display
+function formatTimestamp(timestamp) {
+    // Format Firestore Timestamp to a human-readable date string
+    const date = timestamp.toDate();
+    return date.toLocaleString(); // or use any custom formatting you prefer
+}
         async function loadIncidents() {
             try {
                 // Create a query against the collection, ordering by the 'date' field in ascending order
