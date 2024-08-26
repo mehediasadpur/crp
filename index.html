@@ -255,13 +255,13 @@ window.markAsSolved = markAsSolved;
 
         async function loadIncidents() {
             try {
-                const q = query(collection(db, 'incidents'), orderBy('date', 'asc'));
-                const querySnapshot = await getDocs(collection(db, 'incidents'));
+                
+                const querySnapshot = await getDocs(collection(db, 'incidents', orderBy('date', 'asc')));
                 volunteerMarkers.forEach(marker => map.removeLayer(marker));
                 incidentMarkers.forEach(markerObj => map.removeLayer(markerObj.marker));
                 volunteerMarkers = [];
                 incidentMarkers = [];
-                onSnapshot(q, (querySnapshot) => {
+                
                  // Clear existing list items
                 document.getElementById('incidentItems').innerHTML = '';
 
@@ -275,7 +275,7 @@ window.markAsSolved = markAsSolved;
                         addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString());
                     }
                 });
-               });
+               
             } catch (err) {
                 console.error('Error fetching incidents:', err);
             }
