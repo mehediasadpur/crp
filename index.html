@@ -158,8 +158,7 @@
             const incidentList = document.getElementById('incidentItems');
             const incidentItem = document.createElement('div');
             incidentItem.className = 'incident-item';
-            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}<br>
-                            <a href="#map" onclick="centerOnIncident(${lat}, ${lng})">View on Map</a>`;
+            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}<br><a href="#map" onclick="centerOnIncident(${lat}, ${lng})">View on Map</a>`;
             incidentList.prepend(incidentItem); // Add to the top of the list
         }
 
