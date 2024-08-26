@@ -154,11 +154,12 @@
         }
 
        // Function to add an incident to the list view
-        function addIncidentToList(description, date) {
+        function addIncidentToList(lat, lng, description, date) {
             const incidentList = document.getElementById('incidentItems');
             const incidentItem = document.createElement('div');
             incidentItem.className = 'incident-item';
-            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}`;
+            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}<br>
+                            <a href="#map" onclick="centerOnIncident(${lat}, ${lng})">View on Map</a>`;
             incidentList.prepend(incidentItem); // Add to the top of the list
         }
 
