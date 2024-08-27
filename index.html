@@ -222,24 +222,57 @@ window.markAsSolved = markAsSolved;
             alert('Geolocation is not supported by this browser.');
         }
 
-        // Form Submission Handling
-        document.getElementById('responseForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form from submitting normally
-            const message = document.getElementById('message').value;
-            const type = document.getElementById('type').value;
+// Variable to store the selected location
+let selectedLocation = null;
+let selectionMarker = null;
 
-            // Get the current map center
-            const center = map.getCenter();
-            const lat = center.lat;
-            const lng = center.lng;
-            // Get the current date
+// Function to handle map clicks
+map.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    selectedLocation = { lat, lng };
+
+    // Remove the previous marker if it exists
+    if (selectionMarker) {
+        map.removeLayer(selectionMarker);
+    }
+
+    // Add a marker at the selected location
+    selectionMarker = L.marker([lat, lng]).addTo(map)
+        .bindPopup('Selected Location')
+        .openPopup();
+});
+
+// Form Submission Handling
+document.getElementById('responseForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form from submitting normally
+
+    const message = document.getElementById('message').value;
+    const type = document.getElementById('type').value;
+
+    if (!selectedLocation) {
+        alert('Please select a location on the map.');
+        return;
+    }
+
+    const { lat, lng } = selectedLocation;
+
+    // Get the current date
     const now = new Date();
-            // Save the incident to Firestore
-            saveIncident(lat, lng, message, type, now);
 
-            // Clear the form
-            document.getElementById('message').value = '';
-        });
+    // Save the incident or volunteer to Firestore
+    saveIncident(lat, lng, message, type, now);
+
+    // Clear the form and marker
+    document.getElementById('message').value = '';
+    if (selectionMarker) {
+        map.removeLayer(selectionMarker);
+        selectionMarker = null;
+    }
+    selectedLocation = null;
+});
+
+        
+        
 
         async function saveIncident(lat, lng, message, type, date) {
             try {
