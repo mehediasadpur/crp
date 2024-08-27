@@ -166,6 +166,10 @@ window.viewInMap = function(lat, lng) {
             switchTab('map-view');
             map.setView([lat, lng], 13);
             // Optionally, open the popup for the relevant marker
+    // Find the relevant marker and open its popup
+    const marker = incidentMarkers.find(m => m.marker.getLatLng().lat === lat && m.marker.getLatLng().lng === lng);
+    if (marker) {
+        marker.marker.openPopup();
         }
         
       // Function to mark an incident as solved
