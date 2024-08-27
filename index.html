@@ -154,15 +154,19 @@
         }
 
        // Function to add an incident to the list view
-        function addIncidentToList(description, date) {
+        function addIncidentToList(description, date, lat, lng) {
             const incidentList = document.getElementById('incidentItems');
             const incidentItem = document.createElement('div');
             incidentItem.className = 'incident-item';
-            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}`;
+            incidentItem.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Date:</strong> ${date}<br><a href="#" onclick="viewInMap(${lat}, ${lng})">View in Map</a>`;
             incidentList.prepend(incidentItem); // Add to the top of the list
         }
         
-
+window.viewInMap = function(lat, lng) {
+            switchTab('map-view');
+            map.setView([lat, lng], 13);
+            // Optionally, open the popup for the relevant marker
+        }
         
       // Function to mark an incident as solved
 async function markAsSolved(id) {
@@ -281,7 +285,7 @@ function formatTimestamp(timestamp) {
                         addVolunteer(incident.lat, incident.lng, incident.description);
                     } else if (incident.type === 'incident' && !incident.solved) {
                         addIncident(id, incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
-                        addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString());
+                        addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString(), incident.lat, incident.lng);
                     }
                 });
                
