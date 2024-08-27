@@ -41,6 +41,24 @@
         .tab-content.active {
             display: block;
         }
+
+        .leaflet-bar .my-location-btn {
+    background-color: #fff;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 18px;
+    color: #333;
+}
+
+.leaflet-bar .my-location-btn:hover {
+    background-color: #f4f4f4;
+}
+
     </style>
 </head>
 <body>
@@ -128,6 +146,8 @@
             popupAnchor: [0, -38]
         });
 
+        
+
         // Store markers
         let volunteerMarkers = [];
         let incidentMarkers = [];
@@ -195,13 +215,60 @@ async function markAsSolved(id) {
 window.markAsSolved = markAsSolved;
 
 
+// Create "My Location" button
+L.Control.MyLocation = L.Control.extend({
+    onAdd: function(map) {
+        const btn = L.DomUtil.create('button', 'my-location-btn');
+        btn.innerHTML = '&#x1f4cd;'; // Location pin emoji
+        btn.title = 'Go to My Location';
+
+        L.DomEvent.on(btn, 'click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    map.setView([lat, lng], 13);
+
+                    // Optionally, add a marker at the user's location
+                    const marker = L.marker([lat, lng]).addTo(map)
+                        .bindPopup('You are here')
+                        .openPopup();
+
+                    // Automatically close the popup after a few seconds
+                    setTimeout(() => {
+                        map.removeLayer(marker);
+                    }, 5000);
+                }, function() {
+                    alert('Unable to retrieve your location.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        });
+
+        return btn;
+    },
+
+    onRemove: function(map) {
+        // No-op
+    }
+});
+
+// Add the "My Location" button to the map
+L.control.myLocation = function(opts) {
+    return new L.Control.MyLocation(opts);
+}
+L.control.myLocation({ position: 'topright' }).addTo(map);
+
+        
         // Function to handle the geolocation success
         function onLocationSuccess(position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
             // Center the map on the user's location
-            map.setView([lat, lng], 13);
+            //map.setView([lat, lng], 13);
 
             // Optionally, add a marker at the user's location
             L.marker([lat, lng]).addTo(map)
