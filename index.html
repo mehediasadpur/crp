@@ -216,7 +216,6 @@ window.markAsSolved = markAsSolved;
 
 
 // Create "My Location" button
-// Custom control to go to the user's location
 L.Control.MyLocation = L.Control.extend({
     onAdd: function(map) {
         const btn = L.DomUtil.create('button', 'my-location-btn');
@@ -231,6 +230,13 @@ L.Control.MyLocation = L.Control.extend({
 
                     // Center the map on the user's location
                     map.setView([lat, lng], 13);
+
+                    // Ensure no other selection logic is triggered
+                    selectedLocation = null;
+                    if (selectionMarker) {
+                        map.removeLayer(selectionMarker);
+                    }
+                    selectionMarker = null;
 
                 }, function(error) {
                     console.error('Geolocation error:', error.message);
@@ -254,6 +260,7 @@ L.control.myLocation = function(opts) {
     return new L.Control.MyLocation(opts);
 }
 L.control.myLocation({ position: 'topright' }).addTo(map);
+
 
         
         // Function to handle the geolocation success
