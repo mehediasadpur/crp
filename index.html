@@ -216,6 +216,7 @@ window.markAsSolved = markAsSolved;
 
 
 // Create "My Location" button
+// Custom control to go to the user's location
 L.Control.MyLocation = L.Control.extend({
     onAdd: function(map) {
         const btn = L.DomUtil.create('button', 'my-location-btn');
@@ -228,18 +229,11 @@ L.Control.MyLocation = L.Control.extend({
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
 
+                    // Center the map on the user's location
                     map.setView([lat, lng], 13);
 
-                    // Optionally, add a marker at the user's location
-                    const marker = L.marker([lat, lng]).addTo(map)
-                        .bindPopup('You are here')
-                        .openPopup();
-
-                    // Automatically close the popup after a few seconds
-                    setTimeout(() => {
-                        map.removeLayer(marker);
-                    }, 5000);
-                }, function() {
+                }, function(error) {
+                    console.error('Geolocation error:', error.message);
                     alert('Unable to retrieve your location.');
                 });
             } else {
@@ -255,7 +249,7 @@ L.Control.MyLocation = L.Control.extend({
     }
 });
 
-// Add the "My Location" button to the map
+// Add the "Go to My Location" button to the map
 L.control.myLocation = function(opts) {
     return new L.Control.MyLocation(opts);
 }
