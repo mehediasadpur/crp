@@ -7,8 +7,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
      <link rel="stylesheet" href="style.css" />
     <style>
-        #map { height: 500px; width: 100%; }
-        .form-container { margin-top: 20px; }
+        #map { height: 500px; width: 100%; position: relative; }
+        .form-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            z-index: 1000; /* Ensure the form is on top of the map */
+            width: 300px; /* Set a fixed width for the form */
+        }
         .filters { margin: 10px 0; }
        /* Tabs Styling */
         .tabs {
@@ -48,7 +58,19 @@
 </head>
 <body>
     <h1>Community Response Platform</h1>
-    <div class="form-container">
+    
+   <div class="tabs">
+        <div class="tab-button active" data-tab="map-view">Map View</div>
+        <div class="tab-button" data-tab="list-view">List View</div>
+    </div>
+    <div class="tab-content active" id="map-view">
+    <div class="filters">
+        <label><input type="checkbox" id="filter-volunteers" checked> Show Volunteers</label>
+        <label><input type="checkbox" id="filter-incidents" checked> Show Incidents</label>
+    </div>
+
+    <div id="map">
+<div class="form-container">
         <form id="responseForm">
             <label for="message">Description:</label>
             <textarea id="message" rows="4" cols="50"></textarea>
@@ -62,17 +84,8 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-   <div class="tabs">
-        <div class="tab-button active" data-tab="map-view">Map View</div>
-        <div class="tab-button" data-tab="list-view">List View</div>
+        
     </div>
-    <div class="tab-content active" id="map-view">
-    <div class="filters">
-        <label><input type="checkbox" id="filter-volunteers" checked> Show Volunteers</label>
-        <label><input type="checkbox" id="filter-incidents" checked> Show Incidents</label>
-    </div>
-
-    <div id="map"></div>
     </div>
  <div class="tab-content" id="list-view">
    <div id="incident-list">
