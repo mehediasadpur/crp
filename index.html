@@ -119,6 +119,33 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+// Function to handle the geolocation success
+        function onLocationSuccess(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Center the map on the user's location
+            map.setView([lat, lng], 13);
+
+            // Optionally, add a marker at the user's location
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('You are here')
+                .openPopup();
+        }
+
+        // Function to handle the geolocation error
+        function onLocationError(error) {
+            console.error('Error getting location: ', error);
+            alert('Unable to retrieve your location.');
+        }
+
+        // Request the user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+        
         // Icons for volunteers and incidents
         const volunteerIcon = L.icon({
             iconUrl: 'volunteer-icon.png',
@@ -207,32 +234,7 @@ window.markAsSolved = markAsSolved;
 
 
         
-        // Function to handle the geolocation success
-        function onLocationSuccess(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            // Center the map on the user's location
-            //map.setView([lat, lng], 13);
-
-            // Optionally, add a marker at the user's location
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup('You are here')
-                .openPopup();
-        }
-
-        // Function to handle the geolocation error
-        function onLocationError(error) {
-            console.error('Error getting location: ', error);
-            alert('Unable to retrieve your location.');
-        }
-
-        // Request the user's current location
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
-        } else {
-            alert('Geolocation is not supported by this browser.');
-        }
+        
 
 // Variable to store the selected location
 let selectedLocation = null;
