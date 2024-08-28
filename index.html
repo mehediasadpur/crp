@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community Response Platform</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
      <link rel="stylesheet" href="style.css" />
     <style>
          #map { height: 500px; width: 100%; }
@@ -118,6 +120,17 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+// Add this code after your map is initialized
+
+L.Control.geocoder({
+    defaultMarkGeocode: false
+}).on('markgeocode', function(e) {
+    const latlng = e.geocode.center;
+    map.setView(latlng, 13); // Center the map on the searched location
+    L.marker(latlng).addTo(map)  // Optionally, add a marker at the searched location
+        .bindPopup(e.geocode.name)
+        .openPopup();
+}).addTo(map);
 
 // Function to handle the geolocation success
         function onLocationSuccess(position) {
