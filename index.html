@@ -177,7 +177,6 @@
         }
 
      
-
         // Function to add an incident to the map
         function addIncident(id, lat, lng, description, date) {
             
@@ -188,6 +187,25 @@
             updateMarkersVisibility();
         }
 
+// Function to add an incident to the map when load
+        function addIncidentload(id, lat, lng, description, date) {
+            
+            const marker = L.marker([lat, lng], { icon: incidentIcon }).addTo(map)
+                .bindPopup(`<strong>Incident:</strong> ${description}<br><strong>Date:</strong> ${date}<br><button onclick="markAsSolved('${id}')">Mark as Solved</button>`)
+                ;
+            incidentMarkers.push({ id, marker });
+            updateMarkersVisibility();
+        }
+
+        // Function to add a volunteer to the map when load
+        function addVolunteerload(lat, lng, name) {
+            const marker = L.marker([lat, lng], { icon: volunteerIcon }).addTo(map)
+                .bindPopup(`<strong>Volunteer:</strong> ${name}`)
+                ;
+            volunteerMarkers.push(marker);
+            updateMarkersVisibility();
+        }
+        
        // Function to add an incident to the list view
         function addIncidentToList(description, date, lat, lng) {
             const incidentList = document.getElementById('incidentItems');
@@ -333,9 +351,9 @@ function formatTimestamp(timestamp) {
                     const incident = doc.data();
                     const id = doc.id;
                     if (incident.type === 'volunteer') {
-                        addVolunteer(incident.lat, incident.lng, incident.description);
+                        addVolunteerload(incident.lat, incident.lng, incident.description);
                     } else if (incident.type === 'incident' && !incident.solved) {
-                        addIncident(id, incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
+                        addIncidentload(id, incident.lat, incident.lng, incident.description, new Date(incident.date.toDate()).toLocaleString());
                         addIncidentToList(incident.description, new Date(incident.date.toDate()).toLocaleString(), incident.lat, incident.lng);
                     }
                 });
