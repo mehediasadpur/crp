@@ -421,76 +421,7 @@ function switchTab(tab) {
                 switchTab(button.getAttribute('data-tab'));
             });
         });
-
-
-        
-        
-// Function to get the last notified timestamp from localStorage
-function getLastNotifiedTimestamp() {
-    return localStorage.getItem('lastNotifiedTimestamp') ? parseInt(localStorage.getItem('lastNotifiedTimestamp')) : null;
-}
-
-// Function to set the last notified timestamp in localStorage
-function setLastNotifiedTimestamp(timestamp) {
-    localStorage.setItem('lastNotifiedTimestamp', timestamp);
-}
-
-function requestNotificationPermission() {
-    if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                console.log("Notification permission granted.");
-            } else {
-                console.log("Notification permission denied.");
-            }
-        });
-    } else {
-        console.log("This browser does not support notifications.");
-    }
-}
-
-async function notifyUser(incident) {
-     
-    if (incident.type === 'incident'  && "Notification" in window && Notification.permission === "granted") {
-        const options = {
-            body: `Location: (${incident.lat}, ${incident.lng})`,
-            icon: 'incident-icon.png'
-        };
-        new Notification(`New Incident: ${incident.description}`, options);
-    }
-}
-
-
-const incidentsCollection = collection(db, 'incidents');
-const incidentsQuery = query(incidentsCollection, orderBy('date', 'desc'));
-
-// Load the last notified timestamp from localStorage
-let lastNotifiedTimestamp = getLastNotifiedTimestamp();
-
-onSnapshot(incidentsQuery, (snapshot) => {
-    
-    snapshot.docChanges().forEach(async change => {
        
-        if (change.type === "added") {
-            const incident = change.doc.data();
-
-            // Only proceed if the type is 'incident'
-            if (incident.type === 'incident'  && (!lastNotifiedTimestamp || incident.date.toMillis() > lastNotifiedTimestamp)) {
-                notifyUser(incident);
-
-                // Update the last notified timestamp in localStorage
-                lastNotifiedTimestamp = incident.date.toMillis();
-                setLastNotifiedTimestamp(lastNotifiedTimestamp);
-            }
-        }
-    });
-});
-
-
-// Call the function to request permission on page load
-requestNotificationPermission();
-
-        
     </script>
 
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
