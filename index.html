@@ -174,7 +174,30 @@ L.Control.geocoder({
             popupAnchor: [0, -38]
         });
 
-        
+        async function getUserIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.error('Error fetching IP address:', error);
+    }
+}
+
+function hashIP(ip) {
+    let hash = 0;
+    for (let i = 0; i < ip.length; i++) {
+        const char = ip.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString();
+}
+
+async function getUserIdFromIP() {
+    const ip = await getUserIP();
+    return hashIP(ip);
+}
 
         // Store markers
         let volunteerMarkers = [];
@@ -320,6 +343,7 @@ document.getElementById('responseForm').addEventListener('submit', function(even
         
 
         async function saveIncident(lat, lng, message, type, date) {
+            const userId = await getUserIdFromIP();
             try {
                 const docRef = await addDoc(collection(db, "incidents"), {
                     lat: lat,
@@ -327,7 +351,9 @@ document.getElementById('responseForm').addEventListener('submit', function(even
                     description: message,
                     type: type,
                     solved: false,
-                    date: new Date()
+                    date: new Date(),
+                    userId: userId // Save the generated user ID
+                    
                 });
                 console.log('Incident saved successfully');
 
@@ -419,6 +445,9 @@ function switchTab(tab) {
             });
         });
 
+
+        
+        
 // Function to get the last notified timestamp from localStorage
 function getLastNotifiedTimestamp() {
     return localStorage.getItem('lastNotifiedTimestamp') ? parseInt(localStorage.getItem('lastNotifiedTimestamp')) : null;
@@ -444,7 +473,8 @@ function requestNotificationPermission() {
 }
 
 function notifyUser(incident) {
-    if (incident.type === 'incident' && "Notification" in window && Notification.permission === "granted") {
+     const currentUserId = await getUserIdFromIP(); // Get the current user's ID again
+    if (incident.type === 'incident' &&  incident.userId !== currentUserId() && "Notification" in window && Notification.permission === "granted") {
         const options = {
             body: `Location: (${incident.lat}, ${incident.lng})`,
             icon: 'incident-icon.png'
@@ -466,7 +496,7 @@ onSnapshot(incidentsQuery, (snapshot) => {
             const incident = change.doc.data();
 
             // Only proceed if the type is 'incident'
-            if (incident.type === 'incident' && (!lastNotifiedTimestamp || incident.date.toMillis() > lastNotifiedTimestamp)) {
+            if (incident.type === 'incident' &&  incident.userId !== await getUserIdFromIP()  && (!lastNotifiedTimestamp || incident.date.toMillis() > lastNotifiedTimestamp)) {
                 notifyUser(incident);
 
                 // Update the last notified timestamp in localStorage
