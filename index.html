@@ -419,20 +419,7 @@ function switchTab(tab) {
             });
         });
 
-    </script>
-
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-
-    const firebaseConfig = {
-        // Your Firebase config here
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    function requestNotificationPermission() {
+ function requestNotificationPermission() {
         if ("Notification" in window) {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
@@ -470,8 +457,8 @@ function switchTab(tab) {
 
     // Call the function to request permission on page load
     requestNotificationPermission();
-</script>
-
+        
+    </script>
 
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
