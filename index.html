@@ -491,12 +491,13 @@ const incidentsQuery = query(incidentsCollection, orderBy('date', 'desc'));
 let lastNotifiedTimestamp = getLastNotifiedTimestamp();
 
 onSnapshot(incidentsQuery, (snapshot) => {
+    const currentUserId = await getUserIdFromIP(); // Get the current user's ID again
     snapshot.docChanges().forEach(change => {
         if (change.type === "added") {
             const incident = change.doc.data();
 
             // Only proceed if the type is 'incident'
-            if (incident.type === 'incident' &&  incident.userId !== await getUserIdFromIP()  && (!lastNotifiedTimestamp || incident.date.toMillis() > lastNotifiedTimestamp)) {
+            if (incident.type === 'incident' &&  incident.userId !== currentUserId  && (!lastNotifiedTimestamp || incident.date.toMillis() > lastNotifiedTimestamp)) {
                 notifyUser(incident);
 
                 // Update the last notified timestamp in localStorage
