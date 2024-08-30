@@ -421,6 +421,58 @@ function switchTab(tab) {
 
     </script>
 
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+    const firebaseConfig = {
+        // Your Firebase config here
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    console.log("Notification permission granted.");
+                } else {
+                    console.log("Notification permission denied.");
+                }
+            });
+        } else {
+            console.log("This browser does not support notifications.");
+        }
+    }
+
+    function notifyUser(incident) {
+        if ("Notification" in window && Notification.permission === "granted") {
+            const options = {
+                body: `Location: (${incident.lat}, ${incident.lng})`,
+                icon: 'incident-icon.png'
+            };
+            new Notification(`New Incident: ${incident.description}`, options);
+        }
+    }
+
+    const incidentsCollection = collection(db, 'incidents');
+    const incidentsQuery = query(incidentsCollection, orderBy('date', 'desc'));
+
+    onSnapshot(incidentsQuery, (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+            if (change.type === "added") {
+                const incident = change.doc.data();
+                notifyUser(incident);
+            }
+        });
+    });
+
+    // Call the function to request permission on page load
+    requestNotificationPermission();
+</script>
+
+
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     
 </body>
