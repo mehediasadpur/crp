@@ -491,8 +491,9 @@ const incidentsQuery = query(incidentsCollection, orderBy('date', 'desc'));
 let lastNotifiedTimestamp = getLastNotifiedTimestamp();
 
 onSnapshot(incidentsQuery, (snapshot) => {
-    const currentUserId = await getUserIdFromIP(); // Get the current user's ID again
+    
     snapshot.docChanges().forEach(async change => {
+        const currentUserId = await getUserIdFromIP(); // Get the current user's ID again
         if (change.type === "added") {
             const incident = change.doc.data();
 
