@@ -472,7 +472,7 @@ function requestNotificationPermission() {
     }
 }
 
-function notifyUser(incident) {
+async function notifyUser(incident) {
      const currentUserId = await getUserIdFromIP(); // Get the current user's ID again
     if (incident.type === 'incident' &&  incident.userId !== currentUserId() && "Notification" in window && Notification.permission === "granted") {
         const options = {
